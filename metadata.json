@@ -1,0 +1,5 @@
+{
+  "name": "Ibadan Photographer CSV Generator",
+  "description": "An application that uses Gemini to generate a downloadable CSV file of top photographers in Ibadan, Nigeria, based on public web data.",
+  "requestFramePermissions": []
+}
