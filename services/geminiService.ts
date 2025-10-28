@@ -1,6 +1,5 @@
-
 import { GoogleGenAI } from "@google/genai";
-import { Photographer } from '../types';
+import { BuyerProfile } from '../types';
 
 /**
  * Extracts a JSON array string from a larger text block.
@@ -19,24 +18,35 @@ function extractJsonArrayString(text: string): string | null {
 
 const generatePrompt = () => {
   return `
-    You are an expert data aggregator. Your task is to generate a list of the top 100 photographers based in Ibadan, Nigeria, using Google Search to find public information like Google My Business listings, professional directories, and portfolio websites.
+    You are a lead generation expert. Your task is to generate a list of 500 potential B2B buyers for photo laboratory and photo printing services located in Lagos, Nigeria. Use Google Search to find public information on businesses that would require such services.
 
-    Please format the response as a valid JSON array of objects. Each object in the array represents one photographer and MUST have the following structure and data types:
+    Examples of potential buyers include:
+    - Event management companies
+    - Marketing and advertising agencies
+    - Corporate marketing departments
+    - Large schools and universities
+    - Wedding planners
+    - Professional photography studios that may outsource printing
+    - Art galleries and museums
+
+    Please format the response as a valid JSON array of objects. Each object in the array represents one potential buyer and MUST have the following structure and data types:
     {
       "fullName": "string",
       "portfolioImageUrl": "string (a valid URL)",
-      "specialty": "string"
+      "Interest": "string",
+      "Address": "string"
     }
 
     Instructions:
-    1.  **fullName**: Provide the photographer's full name or their studio's official name.
-    2.  **portfolioImageUrl**: Find a relevant, high-quality image URL from their portfolio, website, or social media. If a specific image is not available, use a generic placeholder like "https://picsum.photos/seed/{unique_seed}/400/300". Replace {unique_seed} with the photographer's name to ensure variety.
-    3.  **specialty**: Briefly describe their main area of focus (e.g., "Wedding Photography", "Event & Portrait Photography", "Fashion & Commercial").
-    4.  **VERY IMPORTANT**: The final output MUST be ONLY the JSON array. Do not include any introductory text, concluding remarks, markdown formatting (like \`\`\`json), or any other text outside of the JSON array itself. The response should start with '[' and end with ']'.
+    1.  **fullName**: Provide the business's full name.
+    2.  **portfolioImageUrl**: Find a URL for the company's logo or a representative image. If a specific image is not available, use a generic placeholder like "https://picsum.photos/seed/{unique_seed}/400/300". Replace {unique_seed} with the business name to ensure variety.
+    3.  **Interest**: Describe their likely need (e.g., "Bulk event photo printing", "Marketing material production", "Fine art prints for exhibitions", "Student ID card printing").
+    4.  **Address**: Provide the physical address of the business in Lagos.
+    5.  **VERY IMPORTANT**: The final output MUST be ONLY the JSON array. Do not include any introductory text, concluding remarks, markdown formatting (like \`\`\`json), or any other text outside of the JSON array itself. The response should start with '[' and end with ']'.
     `;
 };
 
-export const generatePhotographerData = async () => {
+export const generateBuyerData = async () => {
     if (!process.env.API_KEY) {
         throw new Error("API_KEY environment variable not set");
     }
@@ -59,26 +69,24 @@ export const generatePhotographerData = async () => {
     }
     
     try {
-        const parsedData: Omit<Photographer, 'uid' | 'email' | 'role' | 'isFeatured' | 'city' | 'createdAt' | 'earnings' | 'walletBalance'>[] = JSON.parse(jsonString);
+        const parsedData: Omit<BuyerProfile, 'uid' | 'email' | 'role' | 'city' | 'createdAt' | 'walletBalance'>[] = JSON.parse(jsonString);
 
         if (!Array.isArray(parsedData)) {
             throw new Error("Parsed data is not an array.");
         }
 
-        const enrichedData: Photographer[] = parsedData.map((p, index) => ({
+        const enrichedData: BuyerProfile[] = parsedData.map((p, index) => ({
           ...p,
-          uid: `photographer-ibadan-${Date.now()}-${index}`,
+          uid: `buyer-lagos-${Date.now()}-${index}`,
           email: `${p.fullName.toLowerCase().replace(/\s+/g, '.')}.${index}@test.com`,
-          role: 'photographer',
-          isFeatured: Math.random() < 0.2, // Randomly feature ~20%
-          city: 'Ibadan',
+          role: 'buyer',
+          city: 'Lagos',
           createdAt: new Date().toISOString(),
-          earnings: 0,
           walletBalance: 0,
         }));
         
         return {
-            photographers: enrichedData,
+            buyers: enrichedData,
             groundingChunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
         };
 

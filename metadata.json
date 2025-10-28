@@ -1,5 +1,5 @@
 {
-  "name": "Ibadan Photographer CSV Generator",
-  "description": "An application that uses Gemini to generate a downloadable CSV file of top photographers in Ibadan, Nigeria, based on public web data.",
+  "name": "Lagos Photo Buyer CSV Generator",
+  "description": "An application that uses Gemini to generate a downloadable CSV file of top potential buyers for photo laboratory and printing services in Lagos, Nigeria.",
   "requestFramePermissions": []
 }

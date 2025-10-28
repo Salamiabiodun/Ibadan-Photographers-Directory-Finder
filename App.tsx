@@ -1,12 +1,11 @@
-
 import React, { useState, useCallback } from 'react';
-import { generatePhotographerData } from './services/geminiService';
-import { Photographer, GroundingChunk } from './types';
+import { generateBuyerData } from './services/geminiService';
+import { BuyerProfile, GroundingChunk } from './types';
 import Spinner from './components/Spinner';
 import { DownloadIcon, CheckCircleIcon, ExclamationTriangleIcon } from './components/Icons';
 
 const App: React.FC = () => {
-  const [photographers, setPhotographers] = useState<Photographer[] | null>(null);
+  const [buyers, setBuyers] = useState<BuyerProfile[] | null>(null);
   const [groundingChunks, setGroundingChunks] = useState<GroundingChunk[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -14,12 +13,12 @@ const App: React.FC = () => {
   const handleGenerateClick = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    setPhotographers(null);
+    setBuyers(null);
     setGroundingChunks([]);
 
     try {
-      const result = await generatePhotographerData();
-      setPhotographers(result.photographers);
+      const result = await generateBuyerData();
+      setBuyers(result.buyers);
       setGroundingChunks(result.groundingChunks);
     } catch (e: any) {
       setError(e.message || 'An unexpected error occurred.');
@@ -29,12 +28,12 @@ const App: React.FC = () => {
   }, []);
 
   const handleDownloadCsv = useCallback(() => {
-    if (!photographers || photographers.length === 0) return;
+    if (!buyers || buyers.length === 0) return;
 
-    const headers = Object.keys(photographers[0]) as (keyof Photographer)[];
+    const headers = Object.keys(buyers[0]) as (keyof BuyerProfile)[];
     const csvContent = [
       headers.join(','),
-      ...photographers.map(row =>
+      ...buyers.map(row =>
         headers.map(header => {
           const value = row[header];
           const stringValue = typeof value === 'string' ? value : String(value);
@@ -50,42 +49,42 @@ const App: React.FC = () => {
       URL.revokeObjectURL(link.href);
     }
     link.href = URL.createObjectURL(blob);
-    link.download = `ibadan_photographers_${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `lagos_photo_buyers_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [photographers]);
+  }, [buyers]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-4xl mx-auto">
         <header className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-            Ibadan Photographer Directory
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">
+            Lagos Photo Buyer Leads
           </h1>
           <p className="mt-2 text-lg text-gray-400">
-            Generate a downloadable CSV file of top photographers in Ibadan for your database.
+            Generate a downloadable CSV of potential photo service buyers in Lagos.
           </p>
         </header>
 
-        <main className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl shadow-purple-500/10 p-6 sm:p-8 border border-gray-700">
+        <main className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl shadow-teal-500/10 p-6 sm:p-8 border border-gray-700">
           <div className="flex flex-col items-center space-y-6">
             <p className="text-center text-gray-300">
-              Click the button below to use Gemini with Google Search to find photographers and format the data for download.
+              Click the button below to use Gemini to find potential B2B buyers and format their data for download.
             </p>
             
             <button
               onClick={handleGenerateClick}
               disabled={isLoading}
-              className="flex items-center justify-center w-full sm:w-auto px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-full hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-purple-500/50 shadow-lg"
+              className="flex items-center justify-center w-full sm:w-auto px-8 py-4 text-lg font-bold text-white bg-gradient-to-r from-teal-500 to-blue-600 rounded-full hover:from-teal-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-teal-500/50 shadow-lg"
             >
               {isLoading ? (
                 <>
                   <Spinner className="w-6 h-6 mr-3" />
-                  Generating Data...
+                  Generating Leads...
                 </>
               ) : (
-                'Generate CSV Data'
+                'Generate Buyer Data'
               )}
             </button>
 
@@ -99,12 +98,12 @@ const App: React.FC = () => {
               </div>
             )}
 
-            {photographers && photographers.length > 0 && (
+            {buyers && buyers.length > 0 && (
               <div className="mt-6 w-full p-6 bg-green-900/50 border border-green-700 rounded-lg text-center animate-fade-in">
                 <div className="flex flex-col items-center space-y-4">
                   <CheckCircleIcon className="w-16 h-16 text-green-400" />
                   <h2 className="text-2xl font-bold text-green-300">Data Generated Successfully!</h2>
-                  <p className="text-green-200">{photographers.length} photographer records are ready for download.</p>
+                  <p className="text-green-200">{buyers.length} buyer leads are ready for download.</p>
                   <button
                     onClick={handleDownloadCsv}
                     className="flex items-center justify-center space-x-2 px-6 py-3 text-md font-semibold text-gray-900 bg-green-400 rounded-full hover:bg-green-300 transition-colors duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-500/50 shadow-lg"
@@ -126,7 +125,7 @@ const App: React.FC = () => {
                                 href={chunk.web!.uri} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="text-purple-400 hover:text-purple-300 hover:underline truncate block"
+                                className="text-teal-400 hover:text-teal-300 hover:underline truncate block"
                                 title={chunk.web!.title}
                                >
                                   {chunk.web!.title || chunk.web!.uri}

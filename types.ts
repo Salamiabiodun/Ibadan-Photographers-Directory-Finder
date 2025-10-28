@@ -1,15 +1,13 @@
-
-export interface Photographer {
+export interface BuyerProfile {
   uid: string;
   fullName: string;
   email: string;
-  role: 'photographer';
-  isFeatured: boolean;
+  role: 'buyer';
   portfolioImageUrl: string;
-  specialty: string;
-  city: 'Ibadan';
+  Interest: string;
+  city: 'Lagos';
+  Address: string;
   createdAt: string;
-  earnings: number;
   walletBalance: number;
 }
 
